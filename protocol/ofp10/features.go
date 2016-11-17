@@ -9,10 +9,10 @@ import (
 
 type SwitchFeatures struct {
 	ofpxx.Header
-	DPID net.HardwareAddr // Size 8
-	Buffers uint32
-	Tables  uint8
-	pad     []uint8 // Size 3
+	DPID         net.HardwareAddr // Size 8
+	Buffers      uint32
+	Tables       uint8
+	pad          []uint8 // Size 3
 	Capabilities uint32
 	Actions      uint32
 
@@ -56,6 +56,8 @@ func (s *SwitchFeatures) MarshalBinary() (data []byte, err error) {
 	bytes, err = s.Header.MarshalBinary()
 	copy(data[next:], bytes)
 	next += len(bytes)
+	copy(data[next:], s.DPID)
+	next += len(s.DPID)
 	binary.BigEndian.PutUint32(data[next:], s.Buffers)
 	next += 4
 	data[next] = s.Tables
@@ -81,7 +83,7 @@ func (s *SwitchFeatures) MarshalBinary() (data []byte, err error) {
 func (s *SwitchFeatures) UnmarshalBinary(data []byte) error {
 	var err error
 	next := 0
-	
+
 	err = s.Header.UnmarshalBinary(data[next:])
 	next = int(s.Header.Len())
 	copy(s.DPID, data[next:])
@@ -100,6 +102,7 @@ func (s *SwitchFeatures) UnmarshalBinary(data []byte) error {
 	for next < len(data) {
 		p := NewPhyPort()
 		err = p.UnmarshalBinary(data[next:])
+		s.Ports = append(s.Ports, *p)
 		next += int(p.Len())
 	}
 	return err
