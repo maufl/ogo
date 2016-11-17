@@ -91,7 +91,7 @@ func (e *Ethernet) UnmarshalBinary(data []byte) error {
 		return errors.New("The []byte is too short to unmarshal a full Ethernet message.")
 	}
 
-	n := 1
+	n := 0
 
 	e.HWDst = net.HardwareAddr(make([]byte, 6))
 	e.HWSrc = net.HardwareAddr(make([]byte, 6))
