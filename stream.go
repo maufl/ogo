@@ -1,17 +1,17 @@
 package ogo
 
 import (
+	"bytes"
 	"encoding/binary"
 	"github.com/jonstout/ogo/protocol/ofp"
 	"github.com/jonstout/ogo/protocol/util"
 	"log"
 	"net"
-	"bytes"
 )
 
 type BufferPool struct {
 	Empty chan *bytes.Buffer
-	Full chan *bytes.Buffer
+	Full  chan *bytes.Buffer
 }
 
 func NewBufferPool() *BufferPool {
@@ -26,7 +26,7 @@ func NewBufferPool() *BufferPool {
 }
 
 type MessageStream struct {
-	conn *net.TCPConn
+	conn net.Conn
 	pool *BufferPool
 	// OpenFlow Version
 	Version uint8
@@ -42,7 +42,7 @@ type MessageStream struct {
 
 // Returns a pointer to a new MessageStream. Used to parse
 // OpenFlow messages from conn.
-func NewMessageStream(conn *net.TCPConn) *MessageStream {
+func NewMessageStream(conn net.Conn) *MessageStream {
 	m := &MessageStream{
 		conn,
 		NewBufferPool(),
@@ -92,7 +92,7 @@ func (m *MessageStream) inbound() {
 	hdrBuf := make([]byte, 4)
 
 	tmp := make([]byte, 2048)
-	buf := <- m.pool.Empty
+	buf := <-m.pool.Empty
 	for {
 		n, err := m.conn.Read(tmp)
 		if err != nil {
@@ -100,8 +100,8 @@ func (m *MessageStream) inbound() {
 			m.Error <- err
 			m.Shutdown <- true
 			return
-		}		
-		
+		}
+
 		for i := 0; i < n; i++ {
 			if hdr < 4 {
 				hdrBuf[hdr] = tmp[i]
@@ -118,7 +118,7 @@ func (m *MessageStream) inbound() {
 				if msg == 0 {
 					hdr = 0
 					m.pool.Full <- buf
-					buf = <- m.pool.Empty
+					buf = <-m.pool.Empty
 				}
 				continue
 			}
@@ -128,13 +128,13 @@ func (m *MessageStream) inbound() {
 
 func (m *MessageStream) parse() {
 	for {
-		b := <- m.pool.Full
+		b := <-m.pool.Full
 		msg, err := ofp.Parse(b.Bytes())
 		// Log all message parsing errors.
 		if err != nil {
 			log.Print(err)
 		}
-		
+
 		m.Inbound <- msg
 		b.Reset()
 		m.pool.Empty <- b
