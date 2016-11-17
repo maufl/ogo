@@ -163,13 +163,17 @@ func (p *PacketOut) UnmarshalBinary(data []byte) error {
 	p.ActionsLen = binary.BigEndian.Uint16(data[n:])
 	n += 2
 
-	for n < (n + p.ActionsLen) {
-		a := DecodeAction(data[n:])
+	actionsUpperBound := n + p.ActionsLen
+	for n < actionsUpperBound {
+		a, err := DecodeAction(data[n:])
+		if err != nil {
+			return err
+		}
 		p.Actions = append(p.Actions, a)
 		n += a.Len()
 	}
 
-	err = p.Data.UnmarshalBinary(data[n:])
+	p.Data = util.NewBuffer(data[n:])
 	return err
 }
 

@@ -114,7 +114,10 @@ func (f *FlowMod) UnmarshalBinary(data []byte) error {
 	n += 2
 
 	for n < int(f.Header.Length) {
-		a := DecodeAction(data[n:])
+		a, err := DecodeAction(data[n:])
+		if err != nil {
+			return err
+		}
 		f.Actions = append(f.Actions, a)
 		n += int(a.Len())
 	}

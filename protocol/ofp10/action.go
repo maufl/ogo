@@ -31,7 +31,7 @@ type Action interface {
 }
 
 type ActionHeader struct {
-	Type uint16
+	Type   uint16
 	Length uint16
 }
 
@@ -51,7 +51,7 @@ func (a *ActionHeader) MarshalBinary() (data []byte, err error) {
 }
 
 func (a *ActionHeader) UnmarshalBinary(data []byte) error {
-	if len(data) != 4 {
+	if len(data) < 4 {
 		return errors.New("The []byte the wrong size to unmarshal an " +
 			"ActionHeader message.")
 	}
@@ -61,15 +61,15 @@ func (a *ActionHeader) UnmarshalBinary(data []byte) error {
 }
 
 // TODO: Decode other Action types.
-func DecodeAction(data []byte) Action {
+func DecodeAction(data []byte) (Action, error) {
 	t := binary.BigEndian.Uint16(data[:2])
 	var a Action
 	switch t {
 	case ActionType_Output:
 		a = new(ActionOutput)
 	}
-	a.UnmarshalBinary(data)
-	return a
+	err := a.UnmarshalBinary(data)
+	return a, err
 }
 
 // Action structure for OFPAT_OUTPUT, which sends packets out ’port’.
@@ -272,7 +272,7 @@ func (a *ActionVLANPCP) UnmarshalBinary(data []byte) error {
 // ofp_action_header. This action strips the VLAN tag if one is present.
 type ActionStripVLAN struct {
 	ActionHeader
-	pad    []uint8
+	pad []uint8
 }
 
 // Action to strip VLAN IDs from tagged packets.
@@ -413,8 +413,8 @@ func (a *ActionNWAddr) UnmarshalBinary(data []byte) error {
 // positions (shifted to the left by 2).
 type ActionNWTOS struct {
 	ActionHeader
-	NWTOS  uint8
-	pad    []uint8
+	NWTOS uint8
+	pad   []uint8
 }
 
 // Set ToS field in IP packets.
