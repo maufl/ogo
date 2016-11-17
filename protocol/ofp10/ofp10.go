@@ -184,6 +184,7 @@ type PacketIn struct {
 	TotalLen uint16
 	InPort   uint16
 	Reason   uint8
+	pad      uint8
 	Data     eth.Ethernet
 }
 
@@ -194,12 +195,13 @@ func NewPacketIn() *PacketIn {
 	p.BufferId = 0xffffffff
 	p.InPort = P_NONE
 	p.Reason = 0
+	p.pad = 0
 	return p
 }
 
 func (p *PacketIn) Len() (n uint16) {
 	n += p.Header.Len()
-	n += 9
+	n += 10
 	n += p.Data.Len()
 	return
 }
@@ -207,7 +209,7 @@ func (p *PacketIn) Len() (n uint16) {
 func (p *PacketIn) MarshalBinary() (data []byte, err error) {
 	data, err = p.Header.MarshalBinary()
 
-	b := make([]byte, 9)
+	b := make([]byte, 10)
 	n := 0
 	binary.BigEndian.PutUint32(b, p.BufferId)
 	n += 4
@@ -216,6 +218,8 @@ func (p *PacketIn) MarshalBinary() (data []byte, err error) {
 	binary.BigEndian.PutUint16(b[n:], p.InPort)
 	n += 2
 	b[n] = p.Reason
+	n += 1
+	b[n] = p.pad
 	n += 1
 	data = append(data, b...)
 
@@ -235,6 +239,8 @@ func (p *PacketIn) UnmarshalBinary(data []byte) error {
 	p.InPort = binary.BigEndian.Uint16(data[n:])
 	n += 2
 	p.Reason = data[n]
+	n += 1
+	p.pad = data[n]
 	n += 1
 
 	err = p.Data.UnmarshalBinary(data[n:])
