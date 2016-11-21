@@ -5,9 +5,9 @@ import (
 	"errors"
 	"net"
 
-	"github.com/jonstout/ogo/protocol/arp"
-	"github.com/jonstout/ogo/protocol/ipv4"
-	"github.com/jonstout/ogo/protocol/util"
+	"github.com/maufl/openflow/protocol/arp"
+	"github.com/maufl/openflow/protocol/ipv4"
+	"github.com/maufl/openflow/protocol/util"
 )
 
 // see http://en.wikipedia.org/wiki/EtherType

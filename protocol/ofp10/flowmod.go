@@ -3,7 +3,7 @@ package ofp10
 import (
 	"encoding/binary"
 
-	"github.com/jonstout/ogo/protocol/ofpxx"
+	"github.com/maufl/openflow/protocol/ofpxx"
 )
 
 // ofp_flow_mod

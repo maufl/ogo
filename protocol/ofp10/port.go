@@ -4,7 +4,7 @@ import (
 	"encoding/binary"
 	"net"
 
-	"github.com/jonstout/ogo/protocol/ofpxx"
+	"github.com/maufl/openflow/protocol/ofpxx"
 )
 
 // ofp_phy_port 1.0

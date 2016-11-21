@@ -1,10 +1,10 @@
-package ogo
+package openflow
 
 import (
 	"bytes"
 	"encoding/binary"
-	"github.com/jonstout/ogo/protocol/ofp"
-	"github.com/jonstout/ogo/protocol/util"
+	"github.com/maufl/openflow/protocol/ofp"
+	"github.com/maufl/openflow/protocol/util"
 	"log"
 	"net"
 )

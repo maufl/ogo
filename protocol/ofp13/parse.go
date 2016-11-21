@@ -3,7 +3,7 @@ package ofp13
 import (
 	"errors"
 
-	"github.com/jonstout/ogo/protocol/util"
+	"github.com/maufl/openflow/protocol/util"
 )
 
 func Parse(b []byte) (message util.Message, err error) {

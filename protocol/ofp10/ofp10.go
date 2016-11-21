@@ -11,9 +11,9 @@ import (
 	"encoding/binary"
 	"errors"
 
-	"github.com/jonstout/ogo/protocol/eth"
-	"github.com/jonstout/ogo/protocol/ofpxx"
-	"github.com/jonstout/ogo/protocol/util"
+	"github.com/maufl/openflow/protocol/eth"
+	"github.com/maufl/openflow/protocol/ofpxx"
+	"github.com/maufl/openflow/protocol/util"
 )
 
 const (

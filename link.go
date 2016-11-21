@@ -1,4 +1,4 @@
-package ogo
+package openflow
 
 import "time"
 import "net"

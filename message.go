@@ -1,4 +1,4 @@
-package ogo
+package openflow
 
 import (
 	"encoding/binary"

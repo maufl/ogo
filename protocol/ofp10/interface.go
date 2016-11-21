@@ -3,7 +3,7 @@ package ofp10
 import (
 	"net"
 	
-	"github.com/jonstout/ogo/protocol/ofpxx"
+	"github.com/maufl/openflow/protocol/ofpxx"
 )
 
 type ConnectionUpReactor interface {

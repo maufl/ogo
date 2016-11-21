@@ -5,7 +5,7 @@ import (
 	"errors"
 	"net"
 
-	"github.com/jonstout/ogo/protocol/util"
+	"github.com/maufl/openflow/protocol/util"
 )
 
 // ofp_action_type 1.0
