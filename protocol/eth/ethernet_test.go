@@ -27,8 +27,7 @@ func TestEthMarshalBinary(t *testing.T) {
 }
 
 func TestEthUnmarshalBinary(t *testing.T) {
-	b := "   00 " + // Delim
-	        "0a b0 0c 0d e0 0f " + // HWDst
+	b := "0a b0 0c 0d e0 0f " + // HWDst
 		"00 00 00 00 00 ff " + // HWSrc
 		"88 00 " // Ethertype
 	b = strings.Replace(b, " ", "", -1)
@@ -42,8 +41,8 @@ func TestEthUnmarshalBinary(t *testing.T) {
 	dst, _ := net.ParseMAC("0a:b0:0c:0d:e0:0f")
 	src, _ := net.ParseMAC("00:00:00:00:00:ff")
 
-	if int(a.Len()) != (len(byte) - 1) {
-		t.Errorf("Got length of %d, expected %d.", a.Len(), (len(byte) - 1))
+	if int(a.Len()) != len(byte) {
+		t.Errorf("Got length of %d, expected %d.", a.Len(), len(byte))
 	} else if a.Ethertype != 0x8800 {
 		t.Errorf("Got type %d, expected %d.", a.Ethertype, 0x0880)
 	} else if bytes.Compare(a.HWDst, dst) != 0 {
