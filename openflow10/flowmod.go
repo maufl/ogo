@@ -1,14 +1,14 @@
-package ofp10
+package openflow10
 
 import (
 	"encoding/binary"
 
-	"github.com/maufl/openflow/protocol/ofpxx"
+	"github.com/maufl/openflow/openflowxx"
 )
 
 // ofp_flow_mod
 type FlowMod struct {
-	ofpxx.Header
+	openflowxx.Header
 	Match  Match
 	Cookie uint64
 
@@ -24,7 +24,7 @@ type FlowMod struct {
 
 func NewFlowMod() *FlowMod {
 	f := new(FlowMod)
-	f.Header = ofpxx.NewOfp10Header()
+	f.Header = openflowxx.NewOfp10Header()
 	f.Header.Type = Type_FlowMod
 	f.Match = *NewMatch()
 	// Add a generator for f.Cookie here
@@ -140,9 +140,9 @@ const (
 	FF_EMERG         = 1 << 2
 )
 
-// BEGIN: ofp10 - 5.4.2
+// BEGIN: openflow10 - 5.4.2
 type FlowRemoved struct {
-	ofpxx.Header
+	openflowxx.Header
 	Match    Match
 	Cookie   uint64
 	Priority uint16
@@ -160,7 +160,7 @@ type FlowRemoved struct {
 
 func NewFlowRemoved() *FlowRemoved {
 	f := new(FlowRemoved)
-	f.Header = ofpxx.NewOfp10Header()
+	f.Header = openflowxx.NewOfp10Header()
 	f.Match = *NewMatch()
 	f.pad = make([]byte, 1)
 	f.pad2 = make([]byte, 2)

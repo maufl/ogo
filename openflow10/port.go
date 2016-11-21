@@ -1,10 +1,10 @@
-package ofp10
+package openflow10
 
 import (
 	"encoding/binary"
 	"net"
 
-	"github.com/maufl/openflow/protocol/ofpxx"
+	"github.com/maufl/openflow/openflowxx"
 )
 
 // ofp_phy_port 1.0
@@ -40,12 +40,12 @@ func (p *PhyPort) MarshalBinary() (data []byte, err error) {
 	data = make([]byte, int(p.Len()))
 	binary.BigEndian.PutUint16(data, p.PortNo)
 	n := 2
-	
+
 	copy(data[n:], p.HWAddr)
 	n += len(p.HWAddr)
 	copy(data[n:], p.Name)
 	n += len(p.Name)
-	
+
 	binary.BigEndian.PutUint32(data[n:], p.Config)
 	n += 4
 	binary.BigEndian.PutUint32(data[n:], p.State)
@@ -87,7 +87,7 @@ func (p *PhyPort) UnmarshalBinary(data []byte) error {
 
 // ofp_port_mod 1.0
 type PortMod struct {
-	ofpxx.Header
+	openflowxx.Header
 	PortNo uint16
 	HWAddr []uint8
 
@@ -150,7 +150,6 @@ func (p *PortMod) UnmarshalBinary(data []byte) error {
 	n += len(p.pad)
 	return err
 }
-
 
 const (
 	ETH_ALEN          = 6

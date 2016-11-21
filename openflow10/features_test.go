@@ -1,4 +1,4 @@
-package ofp10
+package openflow10
 
 import (
 	"encoding/hex"
@@ -13,7 +13,7 @@ func TestFeaturesReplyMarshalBinary(t *testing.T) {
 		"00 00 00 00" + // Buffers
 		"00 00 00 00" + // Tables and pad
 		"00 00 00 00" + // Capabilities
-		"00 00 00 00"   // Actions
+		"00 00 00 00" // Actions
 	b = strings.Replace(b, " ", "", -1)
 
 	f := NewFeaturesReply()
@@ -32,7 +32,7 @@ func TestFeaturesReplyUnmarshalBinary(t *testing.T) {
 		"00 00 00 00" + // Buffers
 		"00 00 00 00" + // Tables and pad
 		"00 00 00 00" + // Capabilities
-		"00 00 00 00"   // Actions
+		"00 00 00 00" // Actions
 	b = strings.Replace(b, " ", "", -1)
 	bytes, _ := hex.DecodeString(b)
 

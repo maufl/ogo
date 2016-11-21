@@ -1,4 +1,4 @@
-package ofp10
+package openflow10
 
 import (
 	"encoding/binary"

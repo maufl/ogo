@@ -1,14 +1,14 @@
-package ofp10
+package openflow10
 
 import (
 	"encoding/binary"
 	"net"
 
-	"github.com/maufl/openflow/protocol/ofpxx"
+	"github.com/maufl/openflow/openflowxx"
 )
 
 type SwitchFeatures struct {
-	ofpxx.Header
+	openflowxx.Header
 	DPID         net.HardwareAddr // Size 8
 	Buffers      uint32
 	Tables       uint8
@@ -20,8 +20,8 @@ type SwitchFeatures struct {
 }
 
 // FeaturesRequest constructor
-func NewFeaturesRequest() *ofpxx.Header {
-	req := ofpxx.NewOfp10Header()
+func NewFeaturesRequest() *openflowxx.Header {
+	req := openflowxx.NewOfp10Header()
 	req.Type = Type_FeaturesRequest
 	return &req
 }
@@ -29,7 +29,7 @@ func NewFeaturesRequest() *ofpxx.Header {
 // FeaturesReply constructor
 func NewFeaturesReply() *SwitchFeatures {
 	res := new(SwitchFeatures)
-	res.Header = ofpxx.NewOfp10Header()
+	res.Header = openflowxx.NewOfp10Header()
 	res.Header.Type = Type_FeaturesReply
 	res.DPID = make([]byte, 8)
 	res.pad = make([]byte, 3)

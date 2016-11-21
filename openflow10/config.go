@@ -1,13 +1,12 @@
-package ofp10
+package openflow10
 
 import (
 	"encoding/binary"
-
-	"github.com/maufl/openflow/protocol/ofpxx"
+	"github.com/maufl/openflow/openflowxx"
 )
 
-func NewConfigRequest() *ofpxx.Header {
-	h := ofpxx.NewOfp10Header()
+func NewConfigRequest() *openflowxx.Header {
+	h := openflowxx.NewOfp10Header()
 	h.Type = Type_GetConfigRequest
 	return &h
 }
@@ -22,14 +21,14 @@ const (
 
 // ofp_switch_config 1.0
 type SwitchConfig struct {
-	ofpxx.Header
+	openflowxx.Header
 	Flags       uint16 // OFPC_* flags
 	MissSendLen uint16
 }
 
 func NewSetConfig() *SwitchConfig {
 	c := new(SwitchConfig)
-	c.Header = ofpxx.NewOfp10Header()
+	c.Header = openflowxx.NewOfp10Header()
 	c.Header.Type = Type_SetConfig
 	c.Flags = 0
 	c.MissSendLen = 0

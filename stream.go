@@ -3,8 +3,7 @@ package openflow
 import (
 	"bytes"
 	"encoding/binary"
-	"github.com/maufl/openflow/protocol/ofp"
-	"github.com/maufl/openflow/protocol/util"
+	"github.com/maufl/openflow/openflowxx"
 	"log"
 	"net"
 )
@@ -33,9 +32,9 @@ type MessageStream struct {
 	// Channel on which to publish connection errors
 	Error chan error
 	// Channel on which to publish inbound messages
-	Inbound chan util.Message
+	Inbound chan openflowxx.Message
 	// Channel on which to receive outbound messages
-	Outbound chan util.Message
+	Outbound chan openflowxx.Message
 	// Channel on which to receive a shutdown command
 	Shutdown chan bool
 }
@@ -47,10 +46,10 @@ func NewMessageStream(conn net.Conn) *MessageStream {
 		conn,
 		NewBufferPool(),
 		0,
-		make(chan error, 1),        // Error
-		make(chan util.Message, 1), // Inbound
-		make(chan util.Message, 1), // Outbound
-		make(chan bool, 1),         // Shutdown
+		make(chan error, 1),              // Error
+		make(chan openflowxx.Message, 1), // Inbound
+		make(chan openflowxx.Message, 1), // Outbound
+		make(chan bool, 1),               // Shutdown
 	}
 
 	go m.outbound()
@@ -129,7 +128,7 @@ func (m *MessageStream) inbound() {
 func (m *MessageStream) parse() {
 	for {
 		b := <-m.pool.Full
-		msg, err := ofp.Parse(b.Bytes())
+		msg, err := Parse(b.Bytes())
 		// Log all message parsing errors.
 		if err != nil {
 			log.Print(err)

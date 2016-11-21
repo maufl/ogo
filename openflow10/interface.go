@@ -1,9 +1,9 @@
-package ofp10
+package openflow10
 
 import (
 	"net"
-	
-	"github.com/maufl/openflow/protocol/ofpxx"
+
+	"github.com/maufl/openflow/openflowxx"
 )
 
 type ConnectionUpReactor interface {
@@ -15,7 +15,7 @@ type ConnectionDownReactor interface {
 }
 
 type HelloReactor interface {
-	Hello(hello *ofpxx.Header)
+	Hello(hello *openflowxx.Header)
 }
 
 type ErrorReactor interface {
@@ -35,7 +35,7 @@ type VendorReactor interface {
 }
 
 type FeaturesRequestReactor interface {
-	FeaturesRequest(features *ofpxx.Header)
+	FeaturesRequest(features *openflowxx.Header)
 }
 
 type FeaturesReplyReactor interface {
@@ -43,7 +43,7 @@ type FeaturesReplyReactor interface {
 }
 
 type GetConfigRequestReactor interface {
-	GetConfigRequest(config *ofpxx.Header)
+	GetConfigRequest(config *openflowxx.Header)
 }
 
 type GetConfigReplyReactor interface {
@@ -87,9 +87,9 @@ type StatsReplyReactor interface {
 }
 
 type BarrierRequestReactor interface {
-	BarrierRequest(req *ofpxx.Header)
+	BarrierRequest(req *openflowxx.Header)
 }
 
 type BarrierReplyReactor interface {
-	BarrierReply(dpid net.HardwareAddr, msg *ofpxx.Header)
+	BarrierReply(dpid net.HardwareAddr, msg *openflowxx.Header)
 }

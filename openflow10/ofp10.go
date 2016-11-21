@@ -1,19 +1,17 @@
 // OpenFlow Wire Protocol 0x01
-// Package ofp10 provides OpenFlow 1.0 structs along with Read
+// Package openflow10 provides OpenFlow 1.0 structs along with Read
 // and Write methods for each.
 //
 // Struct documentation is taken from the OpenFlow Switch
 // Specification Version 1.0.0.
 // https://www.opennetworking.org/images/stories/downloads/sdn-resources/onf-specifications/openflow/openflow-spec-v1.0.0.pdf
-package ofp10
+package openflow10
 
 import (
 	"encoding/binary"
 	"errors"
 
-	"github.com/maufl/openflow/protocol/eth"
-	"github.com/maufl/openflow/protocol/ofpxx"
-	"github.com/maufl/openflow/protocol/util"
+	"github.com/maufl/openflow/openflowxx"
 )
 
 const (
@@ -24,8 +22,8 @@ const (
 // switch or the controller, and must return an echo reply. They
 // can be used to indicate the latency, bandwidth, and/or
 // liveness of a controller-switch connection.
-func NewEchoRequest() *ofpxx.Header {
-	h := ofpxx.NewOfp10Header()
+func NewEchoRequest() *openflowxx.Header {
+	h := openflowxx.NewOfp10Header()
 	h.Type = Type_EchoRequest
 	return &h
 }
@@ -34,8 +32,8 @@ func NewEchoRequest() *ofpxx.Header {
 // switch or the controller, and must return an echo reply. They
 // can be used to indicate the latency, bandwidth, and/or
 // liveness of a controller-switch connection.
-func NewEchoReply() *ofpxx.Header {
-	h := ofpxx.NewOfp10Header()
+func NewEchoReply() *openflowxx.Header {
+	h := openflowxx.NewOfp10Header()
 	h.Type = Type_EchoReply
 	return &h
 }
@@ -87,17 +85,17 @@ const (
 // action, the in_port in the packet_out message is used in the
 // flow table lookup.
 type PacketOut struct {
-	ofpxx.Header
+	openflowxx.Header
 	BufferId   uint32
 	InPort     uint16
 	ActionsLen uint16
 	Actions    []Action
-	Data       util.Message
+	Data       openflowxx.Message
 }
 
 func NewPacketOut() *PacketOut {
 	p := new(PacketOut)
-	p.Header = ofpxx.NewOfp10Header()
+	p.Header = openflowxx.NewOfp10Header()
 	p.Header.Type = Type_PacketOut
 	p.BufferId = 0xffffffff
 	p.InPort = P_NONE
@@ -173,24 +171,24 @@ func (p *PacketOut) UnmarshalBinary(data []byte) error {
 		n += a.Len()
 	}
 
-	p.Data = util.NewBuffer(data[n:])
+	p.Data = openflowxx.NewBuffer(data[n:])
 	return err
 }
 
 // ofp_packet_in 1.0
 type PacketIn struct {
-	ofpxx.Header
+	openflowxx.Header
 	BufferId uint32
 	TotalLen uint16
 	InPort   uint16
 	Reason   uint8
 	pad      uint8
-	Data     eth.Ethernet
+	Data     openflowxx.Buffer
 }
 
 func NewPacketIn() *PacketIn {
 	p := new(PacketIn)
-	p.Header = ofpxx.NewOfp10Header()
+	p.Header = openflowxx.NewOfp10Header()
 	p.Header.Type = Type_PacketIn
 	p.BufferId = 0xffffffff
 	p.InPort = P_NONE
@@ -255,7 +253,7 @@ const (
 
 // ofp_vendor_header 1.0
 type VendorHeader struct {
-	Header ofpxx.Header /*Type OFPT_VENDOR*/
+	Header openflowxx.Header /*Type OFPT_VENDOR*/
 	Vendor uint32
 }
 

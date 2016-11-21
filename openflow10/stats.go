@@ -1,18 +1,17 @@
-package ofp10
+package openflow10
 
 import (
 	"encoding/binary"
 
-	"github.com/maufl/openflow/protocol/ofpxx"
-	"github.com/maufl/openflow/protocol/util"
+	"github.com/maufl/openflow/openflowxx"
 )
 
 // ofp_stats_request 1.0
 type StatsRequest struct {
-	ofpxx.Header
-	Type   uint16
-	Flags  uint16
-	Body   util.Message
+	openflowxx.Header
+	Type  uint16
+	Flags uint16
+	Body  openflowxx.Message
 }
 
 func (s *StatsRequest) Len() (n uint16) {
@@ -44,7 +43,7 @@ func (s *StatsRequest) UnmarshalBinary(data []byte) error {
 	s.Flags = binary.BigEndian.Uint16(data[n:])
 	n += 2
 
-	var req util.Message
+	var req openflowxx.Message
 	switch s.Type {
 	case StatsType_Aggregate:
 		req = s.Body.(*AggregateStatsRequest)
@@ -70,10 +69,10 @@ func (s *StatsRequest) UnmarshalBinary(data []byte) error {
 
 // _stats_reply 1.0
 type StatsReply struct {
-	ofpxx.Header
-	Type   uint16
-	Flags  uint16
-	Body   util.Message
+	openflowxx.Header
+	Type  uint16
+	Flags uint16
+	Body  openflowxx.Message
 }
 
 func (s *StatsReply) Len() (n uint16) {
@@ -108,7 +107,7 @@ func (s *StatsReply) UnmarshalBinary(data []byte) error {
 	s.Flags = binary.BigEndian.Uint16(data[n:])
 	n += 2
 
-	var req util.Message
+	var req openflowxx.Message
 	switch s.Type {
 	case StatsType_Aggregate:
 		req = s.Body.(*AggregateStats)
@@ -185,7 +184,7 @@ func NewDescStats() *DescStats {
 }
 
 func (s *DescStats) Len() (n uint16) {
-	return uint16(DESC_STR_LEN * 4 + SERIAL_NUM_LEN)
+	return uint16(DESC_STR_LEN*4 + SERIAL_NUM_LEN)
 }
 
 func (s *DescStats) MarshalBinary() (data []byte, err error) {
@@ -244,7 +243,7 @@ func (s *FlowStatsRequest) Len() (n uint16) {
 
 func (s *FlowStatsRequest) MarshalBinary() (data []byte, err error) {
 	data, err = s.Match.MarshalBinary()
-	
+
 	b := make([]byte, 4)
 	n := 0
 	b[n] = s.TableId
@@ -272,9 +271,9 @@ func (s *FlowStatsRequest) UnmarshalBinary(data []byte) error {
 
 // ofp_flow_stats 1.0
 type FlowStats struct {
-	Length       uint16
-	TableId      uint8
-	pad          uint8
+	Length  uint16
+	TableId uint8
+	pad     uint8
 	Match
 	DurationSec  uint32
 	DurationNSec uint32
@@ -350,7 +349,7 @@ func (s *FlowStats) UnmarshalBinary(data []byte) error {
 	s.TableId = data[n]
 	n += 1
 	s.pad = data[n]
-	n += 1	
+	n += 1
 	err := s.Match.UnmarshalBinary(data[n:])
 	n += int(s.Match.Len())
 	s.DurationSec = binary.BigEndian.Uint32(data[n:])
@@ -500,7 +499,7 @@ func (s *AggregateStats) UnmarshalBinary(data []byte) error {
 type TableStats struct {
 	TableId      uint8
 	pad          []uint8 // Size 3
-	Name         []byte // Size MAX_TABLE_NAME_LEN
+	Name         []byte  // Size MAX_TABLE_NAME_LEN
 	Wildcards    uint32
 	MaxEntries   uint32
 	ActiveCount  uint32
@@ -787,7 +786,7 @@ func (s *QueueStats) UnmarshalBinary(data []byte) error {
 
 // ofp_port_status
 type PortStatus struct {
-	ofpxx.Header
+	openflowxx.Header
 	Reason uint8
 	pad    []uint8 // Size 7
 	Desc   PhyPort
@@ -795,7 +794,7 @@ type PortStatus struct {
 
 func NewPortStatus() *PortStatus {
 	p := new(PortStatus)
-	p.Header = ofpxx.NewOfp10Header()
+	p.Header = openflowxx.NewOfp10Header()
 	p.pad = make([]byte, 7)
 	return p
 }
@@ -826,7 +825,7 @@ func (s *PortStatus) MarshalBinary() (data []byte, err error) {
 func (s *PortStatus) UnmarshalBinary(data []byte) error {
 	err := s.Header.UnmarshalBinary(data)
 	n := int(s.Header.Len())
-	
+
 	s.Reason = data[n]
 	n += 1
 	copy(s.pad, data[n:])

@@ -1,11 +1,11 @@
-package ofp10
+package openflow10
 
 import (
 	"encoding/binary"
 	"errors"
 	"net"
 
-	"github.com/maufl/openflow/protocol/util"
+	"github.com/maufl/openflow/openflowxx"
 )
 
 // ofp_action_type 1.0
@@ -27,7 +27,7 @@ const (
 
 type Action interface {
 	Header() *ActionHeader
-	util.Message
+	openflowxx.Message
 }
 
 type ActionHeader struct {

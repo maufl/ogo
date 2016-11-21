@@ -1,11 +1,9 @@
 // Package ofpxx defines OpenFlow message types that are version independent.
-package ofpxx
+package openflowxx
 
 import (
 	"encoding/binary"
 	"errors"
-
-	"github.com/maufl/openflow/protocol/util"
 )
 
 // Returns a new OpenFlow header with version field set to v1.0.
@@ -73,7 +71,7 @@ const (
 
 type HelloElem interface {
 	Header() *HelloElemHeader
-	util.Message
+	Message
 }
 
 type HelloElemHeader struct {

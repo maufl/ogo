@@ -1,23 +1,22 @@
-package ofp10
+package openflow10
 
 import (
 	"encoding/binary"
-	
-	"github.com/maufl/openflow/protocol/ofpxx"
-	"github.com/maufl/openflow/protocol/util"
+
+	"github.com/maufl/openflow/openflowxx"
 )
 
-// BEGIN: ofp10 - 5.4.4
+// BEGIN: openflow10 - 5.4.4
 // ofp_error_msg 1.0
 type ErrorMsg struct {
-	ofpxx.Header
-	Code   uint16
-	Data   util.Buffer
+	openflowxx.Header
+	Code uint16
+	Data openflowxx.Buffer
 }
 
 func NewErrorMsg() *ErrorMsg {
 	e := new(ErrorMsg)
-	e.Data = *util.NewBuffer(make([]byte, 0))
+	e.Data = *openflowxx.NewBuffer(make([]byte, 0))
 	return e
 }
 
@@ -120,5 +119,5 @@ const (
 	QOFC_EPERM
 )
 
-// END: ofp10 - 5.4.4
-// END: ofp10 - 5.4
+// END: openflow10 - 5.4.4
+// END: openflow10 - 5.4

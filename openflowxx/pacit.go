@@ -1,4 +1,4 @@
-package util
+package openflowxx
 
 type Message interface {
 	//encoding.BinaryMarshaler

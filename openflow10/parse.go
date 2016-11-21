@@ -1,25 +1,24 @@
-package ofp10
+package openflow10
 
 import (
 	"errors"
-	
-	"github.com/maufl/openflow/protocol/ofpxx"
-	"github.com/maufl/openflow/protocol/util"
+
+	"github.com/maufl/openflow/openflowxx"
 )
 
-func Parse(b []byte) (message util.Message, err error) {
+func Parse(b []byte) (message openflowxx.Message, err error) {
 	switch b[1] {
 	case Type_Hello:
-		message = new(ofpxx.Header)
+		message = new(openflowxx.Header)
 		err = message.UnmarshalBinary(b)
 	case Type_Error:
 		message = new(ErrorMsg)
 		err = message.UnmarshalBinary(b)
 	case Type_EchoRequest:
-		message = new(ofpxx.Header)
+		message = new(openflowxx.Header)
 		err = message.UnmarshalBinary(b)
 	case Type_EchoReply:
-		message = new(ofpxx.Header)
+		message = new(openflowxx.Header)
 		err = message.UnmarshalBinary(b)
 	case Type_Vendor:
 		message = new(VendorHeader)
@@ -31,7 +30,7 @@ func Parse(b []byte) (message util.Message, err error) {
 		message = NewFeaturesReply()
 		err = message.UnmarshalBinary(b)
 	case Type_GetConfigRequest:
-		message = new(ofpxx.Header)
+		message = new(openflowxx.Header)
 		err = message.UnmarshalBinary(b)
 	case Type_GetConfigReply:
 		message = new(SwitchConfig)
@@ -63,10 +62,10 @@ func Parse(b []byte) (message util.Message, err error) {
 		message = new(StatsReply)
 		err = message.UnmarshalBinary(b)
 	case Type_BarrierRequest:
-		message = new(ofpxx.Header)
+		message = new(openflowxx.Header)
 		err = message.UnmarshalBinary(b)
 	case Type_BarrierReply:
-		message = new(ofpxx.Header)
+		message = new(openflowxx.Header)
 		err = message.UnmarshalBinary(b)
 	case Type_QueueGetConfigRequest:
 		break

@@ -1,4 +1,4 @@
-package ofpxx
+package openflowxx
 
 import (
 	"encoding/hex"
