@@ -4,8 +4,6 @@ import (
 	"encoding/binary"
 	"errors"
 	"net"
-
-	"github.com/maufl/openflow/openflowxx"
 )
 
 // ofp_action_type 1.0
@@ -26,8 +24,10 @@ const (
 )
 
 type Action interface {
+	MarshalBinary() ([]byte, error)
+	UnmarshalBinary([]byte) error
+	Len() uint16
 	Header() *ActionHeader
-	openflowxx.Message
 }
 
 type ActionHeader struct {

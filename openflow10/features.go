@@ -7,8 +7,17 @@ import (
 	"github.com/maufl/openflow/openflowxx"
 )
 
-type SwitchFeatures struct {
-	openflowxx.Header
+type FeaturesRequest struct {
+	*openflowxx.Header
+}
+
+// FeaturesRequest constructor
+func NewFeaturesRequest() *FeaturesRequest {
+	return &FeaturesRequest{openflowxx.NewHeader(VERSION, Type_FeaturesRequest)}
+}
+
+type FeaturesReply struct {
+	*openflowxx.Header
 	DPID         net.HardwareAddr // Size 8
 	Buffers      uint32
 	Tables       uint8
@@ -19,25 +28,17 @@ type SwitchFeatures struct {
 	Ports []PhyPort
 }
 
-// FeaturesRequest constructor
-func NewFeaturesRequest() *openflowxx.Header {
-	req := openflowxx.NewOfp10Header()
-	req.Type = Type_FeaturesRequest
-	return &req
-}
-
 // FeaturesReply constructor
-func NewFeaturesReply() *SwitchFeatures {
-	res := new(SwitchFeatures)
-	res.Header = openflowxx.NewOfp10Header()
-	res.Header.Type = Type_FeaturesReply
-	res.DPID = make([]byte, 8)
-	res.pad = make([]byte, 3)
-	res.Ports = make([]PhyPort, 0)
-	return res
+func NewFeaturesReply() *FeaturesReply {
+	return &FeaturesReply{
+		Header: openflowxx.NewHeader(VERSION, Type_FeaturesReply),
+		DPID:   make([]byte, 8),
+		pad:    make([]byte, 3),
+		Ports:  make([]PhyPort, 0),
+	}
 }
 
-func (s *SwitchFeatures) Len() (n uint16) {
+func (s *FeaturesReply) Len() (n uint16) {
 	n = s.Header.Len()
 	n += uint16(len(s.DPID))
 	n += 16
@@ -47,7 +48,7 @@ func (s *SwitchFeatures) Len() (n uint16) {
 	return
 }
 
-func (s *SwitchFeatures) MarshalBinary() (data []byte, err error) {
+func (s *FeaturesReply) MarshalBinary() (data []byte, err error) {
 	data = make([]byte, int(s.Len()))
 	bytes := make([]byte, 0)
 	next := 0
@@ -80,7 +81,7 @@ func (s *SwitchFeatures) MarshalBinary() (data []byte, err error) {
 	return
 }
 
-func (s *SwitchFeatures) UnmarshalBinary(data []byte) error {
+func (s *FeaturesReply) UnmarshalBinary(data []byte) error {
 	var err error
 	next := 0
 

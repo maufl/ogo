@@ -6,12 +6,24 @@ import (
 	"github.com/maufl/openflow/openflowxx"
 )
 
+type StatsMessage interface {
+	MarshalBinary() ([]byte, error)
+	UnmarshalBinary([]byte) error
+	Len() uint16
+}
+
 // ofp_stats_request 1.0
 type StatsRequest struct {
-	openflowxx.Header
+	*openflowxx.Header
 	Type  uint16
 	Flags uint16
-	Body  openflowxx.Message
+	Body  StatsMessage
+}
+
+func NewStatsRequest() *StatsRequest {
+	return &StatsRequest{
+		Header: openflowxx.NewHeader(VERSION, Type_StatsRequest),
+	}
 }
 
 func (s *StatsRequest) Len() (n uint16) {
@@ -43,7 +55,7 @@ func (s *StatsRequest) UnmarshalBinary(data []byte) error {
 	s.Flags = binary.BigEndian.Uint16(data[n:])
 	n += 2
 
-	var req openflowxx.Message
+	var req StatsMessage
 	switch s.Type {
 	case StatsType_Aggregate:
 		req = s.Body.(*AggregateStatsRequest)
@@ -69,10 +81,16 @@ func (s *StatsRequest) UnmarshalBinary(data []byte) error {
 
 // _stats_reply 1.0
 type StatsReply struct {
-	openflowxx.Header
+	*openflowxx.Header
 	Type  uint16
 	Flags uint16
-	Body  openflowxx.Message
+	Body  StatsMessage
+}
+
+func NewStatsReply() *StatsReply {
+	return &StatsReply{
+		Header: openflowxx.NewHeader(VERSION, Type_StatsReply),
+	}
 }
 
 func (s *StatsReply) Len() (n uint16) {
@@ -107,7 +125,7 @@ func (s *StatsReply) UnmarshalBinary(data []byte) error {
 	s.Flags = binary.BigEndian.Uint16(data[n:])
 	n += 2
 
-	var req openflowxx.Message
+	var req StatsMessage
 	switch s.Type {
 	case StatsType_Aggregate:
 		req = s.Body.(*AggregateStats)
@@ -783,61 +801,3 @@ func (s *QueueStats) UnmarshalBinary(data []byte) error {
 	n += 8
 	return nil
 }
-
-// ofp_port_status
-type PortStatus struct {
-	openflowxx.Header
-	Reason uint8
-	pad    []uint8 // Size 7
-	Desc   PhyPort
-}
-
-func NewPortStatus() *PortStatus {
-	p := new(PortStatus)
-	p.Header = openflowxx.NewOfp10Header()
-	p.pad = make([]byte, 7)
-	return p
-}
-
-func (p *PortStatus) Len() (n uint16) {
-	n = p.Header.Len()
-	n += 8
-	n += p.Desc.Len()
-	return
-}
-
-func (s *PortStatus) MarshalBinary() (data []byte, err error) {
-	s.Header.Length = s.Len()
-	data, err = s.Header.MarshalBinary()
-
-	b := make([]byte, 8)
-	n := 0
-	b[0] = s.Reason
-	n += 1
-	copy(b[n:], s.pad)
-	data = append(data, b...)
-
-	b, err = s.Desc.MarshalBinary()
-	data = append(data, b...)
-	return
-}
-
-func (s *PortStatus) UnmarshalBinary(data []byte) error {
-	err := s.Header.UnmarshalBinary(data)
-	n := int(s.Header.Len())
-
-	s.Reason = data[n]
-	n += 1
-	copy(s.pad, data[n:])
-	n += len(s.pad)
-
-	err = s.Desc.UnmarshalBinary(data[n:])
-	return err
-}
-
-// ofp_port_reason 1.0
-const (
-	PR_ADD = iota
-	PR_DELETE
-	PR_MODIFY
-)

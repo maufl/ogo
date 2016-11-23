@@ -9,70 +9,54 @@ import (
 func Parse(b []byte) (message openflowxx.Message, err error) {
 	switch b[1] {
 	case Type_Hello:
-		message = new(openflowxx.Header)
-		err = message.UnmarshalBinary(b)
+		message = NewHello()
 	case Type_Error:
-		message = new(ErrorMsg)
-		err = message.UnmarshalBinary(b)
+		message = NewError()
 	case Type_EchoRequest:
-		message = new(openflowxx.Header)
-		err = message.UnmarshalBinary(b)
+		message = NewEchoRequest()
 	case Type_EchoReply:
-		message = new(openflowxx.Header)
-		err = message.UnmarshalBinary(b)
+		message = NewEchoReply()
 	case Type_Vendor:
-		message = new(VendorHeader)
-		err = message.UnmarshalBinary(b)
+		message = NewVendor()
 	case Type_FeaturesRequest:
 		message = NewFeaturesRequest()
-		err = message.UnmarshalBinary(b)
 	case Type_FeaturesReply:
 		message = NewFeaturesReply()
-		err = message.UnmarshalBinary(b)
 	case Type_GetConfigRequest:
-		message = new(openflowxx.Header)
-		err = message.UnmarshalBinary(b)
+		message = NewGetConfigRequest()
 	case Type_GetConfigReply:
-		message = new(SwitchConfig)
-		err = message.UnmarshalBinary(b)
+		message = NewGetConfigReply()
 	case Type_SetConfig:
 		message = NewSetConfig()
-		err = message.UnmarshalBinary(b)
 	case Type_PacketIn:
-		message = new(PacketIn)
-		err = message.UnmarshalBinary(b)
+		message = NewPacketIn()
 	case Type_FlowRemoved:
 		message = NewFlowRemoved()
-		err = message.UnmarshalBinary(b)
 	case Type_PortStatus:
-		message = new(PortStatus)
-		err = message.UnmarshalBinary(b)
+		message = NewPortStatus()
 	case Type_PacketOut:
-		message = new(PacketOut)
-		err = message.UnmarshalBinary(b)
+		message = NewPacketOut()
 	case Type_FlowMod:
 		message = NewFlowMod()
-		err = message.UnmarshalBinary(b)
 	case Type_PortMod:
-		break
+		err = errors.New("An unknown v1.0 packet type was received. Parse function will discard data.")
 	case Type_StatsRequest:
-		message = new(StatsRequest)
-		err = message.UnmarshalBinary(b)
+		message = NewStatsRequest()
 	case Type_StatsReply:
-		message = new(StatsReply)
-		err = message.UnmarshalBinary(b)
+		message = NewStatsReply()
 	case Type_BarrierRequest:
 		message = new(openflowxx.Header)
-		err = message.UnmarshalBinary(b)
 	case Type_BarrierReply:
 		message = new(openflowxx.Header)
-		err = message.UnmarshalBinary(b)
 	case Type_QueueGetConfigRequest:
-		break
+		err = errors.New("An unknown v1.0 packet type was received. Parse function will discard data.")
 	case Type_QueueGetConfigReply:
-		break
+		err = errors.New("An unknown v1.0 packet type was received. Parse function will discard data.")
 	default:
 		err = errors.New("An unknown v1.0 packet type was received. Parse function will discard data.")
+	}
+	if message != nil {
+		err = message.UnmarshalBinary(b)
 	}
 	return
 }

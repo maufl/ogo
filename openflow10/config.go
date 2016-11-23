@@ -5,10 +5,12 @@ import (
 	"github.com/maufl/openflow/openflowxx"
 )
 
-func NewConfigRequest() *openflowxx.Header {
-	h := openflowxx.NewOfp10Header()
-	h.Type = Type_GetConfigRequest
-	return &h
+type GetConfigRequest struct {
+	*openflowxx.Header
+}
+
+func NewGetConfigRequest() *GetConfigRequest {
+	return &GetConfigRequest{openflowxx.NewHeader(VERSION, Type_GetConfigRequest)}
 }
 
 // ofp_config_flags 1.0
@@ -21,18 +23,9 @@ const (
 
 // ofp_switch_config 1.0
 type SwitchConfig struct {
-	openflowxx.Header
+	*openflowxx.Header
 	Flags       uint16 // OFPC_* flags
 	MissSendLen uint16
-}
-
-func NewSetConfig() *SwitchConfig {
-	c := new(SwitchConfig)
-	c.Header = openflowxx.NewOfp10Header()
-	c.Header.Type = Type_SetConfig
-	c.Flags = 0
-	c.MissSendLen = 0
-	return c
 }
 
 func (c *SwitchConfig) Len() (n uint16) {
@@ -68,4 +61,20 @@ func (c *SwitchConfig) UnmarshalBinary(data []byte) error {
 	c.MissSendLen = binary.BigEndian.Uint16(data[next:])
 	next += 2
 	return err
+}
+
+type SetConfig struct {
+	SwitchConfig
+}
+
+func NewSetConfig() *SetConfig {
+	return &SetConfig{SwitchConfig{Header: openflowxx.NewHeader(VERSION, Type_SetConfig)}}
+}
+
+type GetConfigReply struct {
+	SwitchConfig
+}
+
+func NewGetConfigReply() *GetConfigReply {
+	return &GetConfigReply{SwitchConfig{Header: openflowxx.NewHeader(VERSION, Type_GetConfigReply)}}
 }

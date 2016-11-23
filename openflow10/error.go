@@ -8,26 +8,27 @@ import (
 
 // BEGIN: openflow10 - 5.4.4
 // ofp_error_msg 1.0
-type ErrorMsg struct {
-	openflowxx.Header
+type Error struct {
+	*openflowxx.Header
 	Code uint16
-	Data openflowxx.Buffer
+	Data *openflowxx.Buffer
 }
 
-func NewErrorMsg() *ErrorMsg {
-	e := new(ErrorMsg)
-	e.Data = *openflowxx.NewBuffer(make([]byte, 0))
-	return e
+func NewError() *Error {
+	return &Error{
+		Header: openflowxx.NewHeader(VERSION, Type_Error),
+		Data:   openflowxx.NewBuffer([]byte{}),
+	}
 }
 
-func (e *ErrorMsg) Len() (n uint16) {
+func (e *Error) Len() (n uint16) {
 	n = e.Header.Len()
 	n += 2
 	n += e.Data.Len()
 	return
 }
 
-func (e *ErrorMsg) MarshalBinary() (data []byte, err error) {
+func (e *Error) MarshalBinary() (data []byte, err error) {
 	data = make([]byte, int(e.Len()))
 	next := 0
 
@@ -42,7 +43,7 @@ func (e *ErrorMsg) MarshalBinary() (data []byte, err error) {
 	return
 }
 
-func (e *ErrorMsg) UnmarshalBinary(data []byte) error {
+func (e *Error) UnmarshalBinary(data []byte) error {
 	next := 0
 	e.Header.UnmarshalBinary(data[next:])
 	next += int(e.Header.Len())

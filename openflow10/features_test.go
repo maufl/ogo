@@ -17,6 +17,7 @@ func TestFeaturesReplyMarshalBinary(t *testing.T) {
 	b = strings.Replace(b, " ", "", -1)
 
 	f := NewFeaturesReply()
+	f.Header.Xid = 2
 	data, _ := f.MarshalBinary()
 	d := hex.EncodeToString(data)
 	if (len(b) != len(d)) || (b != d) {

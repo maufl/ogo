@@ -8,8 +8,8 @@ import (
 
 // ofp_flow_mod
 type FlowMod struct {
-	openflowxx.Header
-	Match  Match
+	*openflowxx.Header
+	Match  *Match
 	Cookie uint64
 
 	Command     uint16
@@ -23,23 +23,14 @@ type FlowMod struct {
 }
 
 func NewFlowMod() *FlowMod {
-	f := new(FlowMod)
-	f.Header = openflowxx.NewOfp10Header()
-	f.Header.Type = Type_FlowMod
-	f.Match = *NewMatch()
-	// Add a generator for f.Cookie here
-	f.Cookie = 0
-
-	f.Command = FC_ADD
-	f.IdleTimeout = 0
-	f.HardTimeout = 0
-	// Add a priority gen here
-	f.Priority = 1000
-	f.BufferId = 0xffffffff
-	f.OutPort = P_NONE
-	f.Flags = 0
-	f.Actions = make([]Action, 0)
-	return f
+	return &FlowMod{
+		Header:   openflowxx.NewHeader(VERSION, Type_FlowMod),
+		Match:    NewMatch(),
+		Priority: 1000,
+		BufferId: 0xffffffff,
+		OutPort:  P_NONE,
+		Actions:  make([]Action, 0),
+	}
 }
 
 func (f *FlowMod) AddAction(a Action) {
@@ -142,8 +133,8 @@ const (
 
 // BEGIN: openflow10 - 5.4.2
 type FlowRemoved struct {
-	openflowxx.Header
-	Match    Match
+	*openflowxx.Header
+	Match    *Match
 	Cookie   uint64
 	Priority uint16
 	Reason   uint8
@@ -159,12 +150,12 @@ type FlowRemoved struct {
 }
 
 func NewFlowRemoved() *FlowRemoved {
-	f := new(FlowRemoved)
-	f.Header = openflowxx.NewOfp10Header()
-	f.Match = *NewMatch()
-	f.pad = make([]byte, 1)
-	f.pad2 = make([]byte, 2)
-	return f
+	return &FlowRemoved{
+		Header: openflowxx.NewHeader(VERSION, Type_FlowRemoved),
+		Match:  NewMatch(),
+		pad:    make([]byte, 1),
+		pad2:   make([]byte, 2),
+	}
 }
 
 func (f *FlowRemoved) Len() (n uint16) {
