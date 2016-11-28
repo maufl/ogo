@@ -31,6 +31,7 @@ func (s *StatsRequest) Len() (n uint16) {
 }
 
 func (s *StatsRequest) MarshalBinary() (data []byte, err error) {
+	s.Header.Length = s.Len()
 	data, err = s.Header.MarshalBinary()
 
 	b := make([]byte, 4)
@@ -124,29 +125,32 @@ func (s *StatsReply) UnmarshalBinary(data []byte) error {
 	n += 2
 	s.Flags = binary.BigEndian.Uint16(data[n:])
 	n += 2
-
-	var req StatsMessage
+	if s.Header.Length <= 12 {
+		return err
+	}
 	switch s.Type {
 	case StatsType_Aggregate:
-		req = s.Body.(*AggregateStats)
+		s.Body = NewAggregateStats()
 	case StatsType_Desc:
-		req = s.Body.(*DescStats)
+		s.Body = NewDescStats()
 	case StatsType_Flow:
 		// Array
-		req = s.Body.(*FlowStats)
+		s.Body = NewFlowStatsArray()
 	case StatsType_Port:
-		req = s.Body.(*PortStats)
+		s.Body = NewPortStats()
 	case StatsType_Table:
 		// Array
-		req = s.Body.(*TableStats)
+		s.Body = NewTableStats()
 	case StatsType_Queue:
 		// Array
-		req = s.Body.(*QueueStats)
+		s.Body = NewQueueStats()
 	case StatsType_Vendor:
 		// Array of Group Stats
-		break
+		s.Body = openflowxx.NewBuffer([]byte{})
+	default:
+		s.Body = openflowxx.NewBuffer([]byte{})
 	}
-	err = req.UnmarshalBinary(data[n:])
+	err = s.Body.UnmarshalBinary(data[n:])
 	return err
 }
 
@@ -268,7 +272,7 @@ func (s *FlowStatsRequest) MarshalBinary() (data []byte, err error) {
 	n += 1
 	b[n] = s.pad
 	n += 1
-	binary.BigEndian.PutUint16(data[n:], s.OutPort)
+	binary.BigEndian.PutUint16(b[n:], s.OutPort)
 	n += 2
 	data = append(data, b...)
 	return
@@ -419,10 +423,55 @@ func (s *FlowStats) UnmarshalBinary(data []byte) error {
 		case ActionType_Vendor:
 			a = NewActionVendor(0)
 		}
+		if err = a.UnmarshalBinary(data[n:]); err != nil {
+			return err
+		}
 		s.Actions = append(s.Actions, a)
 		n += int(a.Len())
 	}
 	return err
+}
+
+type FlowStatsArray struct {
+	Array []*FlowStats
+}
+
+func NewFlowStatsArray() *FlowStatsArray {
+	return &FlowStatsArray{Array: make([]*FlowStats, 0)}
+}
+
+func (fsa *FlowStatsArray) Len() (n uint16) {
+	for _, fs := range fsa.Array {
+		n += fs.Len()
+	}
+	return
+}
+
+func (fsa *FlowStatsArray) MarshalBinary() (data []byte, err error) {
+	data = make([]byte, int(fsa.Len()))
+	n := 0
+	for _, fs := range fsa.Array {
+		b, err := fs.MarshalBinary()
+		if err != nil {
+			return nil, err
+		}
+		copy(data[n:], b)
+		n += len(b)
+	}
+	return
+}
+
+func (fsa *FlowStatsArray) UnmarshalBinary(data []byte) error {
+	n := 0
+	for n < len(data) {
+		fs := NewFlowStats()
+		if err := fs.UnmarshalBinary(data[n:]); err != nil {
+			return err
+		}
+		fsa.Array = append(fsa.Array, fs)
+		n += int(fs.Len())
+	}
+	return nil
 }
 
 // ofp_aggregate_stats_request 1.0
@@ -760,6 +809,12 @@ type QueueStats struct {
 	TxBytes   uint64
 	TxPackets uint64
 	TxErrors  uint64
+}
+
+func NewQueueStats() *QueueStats {
+	return &QueueStats{
+		pad: make([]uint8, 2),
+	}
 }
 
 func (s *QueueStats) Len() (n uint16) {

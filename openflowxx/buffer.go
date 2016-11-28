@@ -4,10 +4,10 @@ import (
 	"bytes"
 )
 
-type Buffer struct{ *bytes.Buffer }
+type Buffer struct{ bytes.Buffer }
 
 func NewBuffer(buf []byte) *Buffer {
-	return &Buffer{bytes.NewBuffer(buf)}
+	return &Buffer{*bytes.NewBuffer(buf)}
 }
 
 func (b *Buffer) Len() uint16 {
