@@ -2,6 +2,7 @@ package openflow10
 
 import (
 	"encoding/binary"
+	"errors"
 	"fmt"
 	"github.com/maufl/openflow/openflowxx"
 )
@@ -16,10 +17,12 @@ type Error struct {
 }
 
 func NewError() *Error {
-	return &Error{
+	e := &Error{
 		Header: openflowxx.NewHeader(VERSION, Type_Error),
 		Data:   openflowxx.NewBuffer([]byte{}),
 	}
+	e.Header.Length = e.Len()
+	return e
 }
 
 func (e *Error) String() string {
@@ -34,6 +37,7 @@ func (e *Error) Len() (n uint16) {
 }
 
 func (e *Error) MarshalBinary() (data []byte, err error) {
+	e.Header.Length = e.Len()
 	data = make([]byte, int(e.Len()))
 	next := 0
 
@@ -50,7 +54,10 @@ func (e *Error) MarshalBinary() (data []byte, err error) {
 	return
 }
 
-func (e *Error) UnmarshalBinary(data []byte) error {
+func (e *Error) UnmarshalBinary(data []byte) (err error) {
+	if len(data) < int(e.Len()) {
+		return errors.New("Insufficent data to unmarshal error message")
+	}
 	next := 0
 	e.Header.UnmarshalBinary(data[next:])
 	next += int(e.Header.Len())
@@ -58,8 +65,9 @@ func (e *Error) UnmarshalBinary(data []byte) error {
 	next += 2
 	e.Code = binary.BigEndian.Uint16(data[next:])
 	next += 2
-	e.Data.UnmarshalBinary(data[next:])
+	err = e.Data.UnmarshalBinary(data[next:])
 	next += int(e.Data.Len())
+	e.Header.Length = uint16(next)
 	return nil
 }
 

@@ -12,6 +12,7 @@ var rawPortMod string = "010f0020aa209b8e00010123456789ab0000000a0000000a0000000
 func TestPortModMarshaling(t *testing.T) {
 	t.Parallel()
 	portMod := NewPortMod()
+	portMod.Header.Xid = 0xaa209b8e
 	portMod.PortNo = 1
 	portMod.HWAddr = []byte{0x01, 0x23, 0x45, 0x67, 0x89, 0xab}
 	portMod.Config = PC_NO_STP | PC_NO_STP_RECV
