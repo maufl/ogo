@@ -2,7 +2,7 @@ package openflow10
 
 import (
 	"encoding/binary"
-
+	"fmt"
 	"github.com/maufl/openflow/openflowxx"
 )
 
@@ -10,6 +10,7 @@ import (
 // ofp_error_msg 1.0
 type Error struct {
 	*openflowxx.Header
+	Type uint16
 	Code uint16
 	Data *openflowxx.Buffer
 }
@@ -21,9 +22,13 @@ func NewError() *Error {
 	}
 }
 
+func (e *Error) String() string {
+	return fmt.Sprintf("Error{ %s, Type: %d, Code: %d, Data: %x }", e.Header, e.Type, e.Code, e.Data)
+}
+
 func (e *Error) Len() (n uint16) {
 	n = e.Header.Len()
-	n += 2
+	n += 4
 	n += e.Data.Len()
 	return
 }
@@ -35,6 +40,8 @@ func (e *Error) MarshalBinary() (data []byte, err error) {
 	bytes, err := e.Header.MarshalBinary()
 	copy(data[next:], bytes)
 	next += len(bytes)
+	binary.BigEndian.PutUint16(data[next:], e.Type)
+	next += 2
 	binary.BigEndian.PutUint16(data[next:], e.Code)
 	next += 2
 	bytes, err = e.Data.MarshalBinary()
@@ -47,6 +54,8 @@ func (e *Error) UnmarshalBinary(data []byte) error {
 	next := 0
 	e.Header.UnmarshalBinary(data[next:])
 	next += int(e.Header.Len())
+	e.Type = binary.BigEndian.Uint16(data[next:])
+	next += 2
 	e.Code = binary.BigEndian.Uint16(data[next:])
 	next += 2
 	e.Data.UnmarshalBinary(data[next:])
