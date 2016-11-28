@@ -1,6 +1,8 @@
 package openflow10
 
 import (
+	"fmt"
+
 	"github.com/maufl/openflow/openflowxx"
 )
 
@@ -17,6 +19,10 @@ func NewPortStatus() *PortStatus {
 		Header: openflowxx.NewHeader(VERSION, Type_PortStatus),
 		pad:    make([]byte, 7),
 	}
+}
+
+func (ps *PortStatus) String() string {
+	return fmt.Sprintf("PortStatus{ Reason: %d, Desc: %s }", ps.Reason, ps.Desc)
 }
 
 func (p *PortStatus) Len() (n uint16) {

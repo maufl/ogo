@@ -4,6 +4,7 @@ package openflowxx
 import (
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"math/rand"
 )
 
@@ -37,6 +38,10 @@ func (h *Header) Head() *Header {
 
 func (h *Header) Len() (n uint16) {
 	return 8
+}
+
+func (h *Header) String() string {
+	return fmt.Sprintf("Header{ Version: %d, Type: %d, Length: %d, Xid: %d }", h.Version, h.Type, h.Length, h.Xid)
 }
 
 func (h *Header) MarshalBinary() (data []byte, err error) {

@@ -2,6 +2,7 @@ package openflow10
 
 import (
 	"encoding/binary"
+	"fmt"
 	"net"
 
 	"github.com/maufl/openflow/openflowxx"
@@ -27,6 +28,11 @@ func NewPhyPort() *PhyPort {
 	p.HWAddr = make([]byte, ETH_ALEN)
 	p.Name = make([]byte, 16)
 	return p
+}
+
+func (p PhyPort) String() string {
+	return fmt.Sprintf("PhyPort{ PortNo: %d, HWAddr: %s, Name: %s, Config: %b, State: %b, Curr: %b, Advertised: %b, Supported: %b, Peer: %b }",
+		p.PortNo, p.HWAddr, string(p.Name), p.Config, p.State, p.Curr, p.Advertised, p.Supported, p.Peer)
 }
 
 func (p *PhyPort) Len() (n uint16) {
