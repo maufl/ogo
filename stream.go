@@ -127,6 +127,9 @@ func (m *MessageStream) inbound() {
 }
 
 func (m *MessageStream) parse() {
+	defer func() {
+		recover()
+	}()
 	for {
 		b := <-m.pool.Full
 		msg, err := Parse(b.Bytes())
@@ -134,7 +137,7 @@ func (m *MessageStream) parse() {
 		if err != nil {
 			log.Print(err)
 		}
-
+		// TODO we close the channel in inbound, this leads to a panic
 		m.Inbound <- msg
 		b.Reset()
 		m.pool.Empty <- b
