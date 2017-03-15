@@ -88,6 +88,16 @@ func (f *FlowMod) Len() (n uint16) {
 	return
 }
 
+func (f *FlowMod) Clone() (newFlowMod *FlowMod) {
+	newFlowMod = &FlowMod{Header: &openflowxx.Header{}, Match: &Match{}}
+	*newFlowMod = *f
+	newFlowMod.Header = f.Header.Clone()
+	newFlowMod.Match = f.Match.Clone()
+	newFlowMod.Actions = make([]Action, len(f.Actions))
+	copy(newFlowMod.Actions, f.Actions)
+	return
+}
+
 func (f *FlowMod) MarshalBinary() (data []byte, err error) {
 	f.Header.Length = f.Len()
 	data, err = f.Header.MarshalBinary()

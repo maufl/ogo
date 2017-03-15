@@ -52,6 +52,12 @@ func (h *Header) Equal(other interface{}) bool {
 		h.Xid == otherHeader.Xid
 }
 
+func (h *Header) Clone() (newHeader *Header) {
+	newHeader = &Header{}
+	*newHeader = *h
+	return
+}
+
 func (h *Header) MarshalBinary() (data []byte, err error) {
 	data = make([]byte, 8)
 	data[0] = h.Version

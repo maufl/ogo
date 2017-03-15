@@ -22,3 +22,11 @@ func TestFlowModMarshaling(t *testing.T) {
 		t.Errorf("Flow mod is not equal to unmarshaled self:\n%+v\n%+v", fm, newFm)
 	}
 }
+
+func TestFlowModClone(t *testing.T) {
+	fm := NewFlowMod()
+	tmp := fm.Clone()
+	if !fm.Equal(tmp) {
+		t.Errorf("Cloned flow mod is not equal to original")
+	}
+}

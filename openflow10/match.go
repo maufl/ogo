@@ -68,6 +68,16 @@ func (m *Match) Equal(other interface{}) bool {
 		m.TPDst == otherMatch.TPDst
 }
 
+func (m *Match) Clone() (newMatch *Match) {
+	newMatch = &Match{}
+	*newMatch = *m
+	newMatch.pad = make([]uint8, len(m.pad))
+	copy(newMatch.pad, m.pad)
+	newMatch.pad2 = make([]uint8, len(m.pad2))
+	copy(newMatch.pad2, m.pad2)
+	return
+}
+
 func (m *Match) MarshalBinary() (data []byte, err error) {
 	data = make([]byte, int(m.Len()))
 	n := 0
