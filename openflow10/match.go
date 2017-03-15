@@ -1,7 +1,9 @@
 package openflow10
 
 import (
+	"bytes"
 	"encoding/binary"
+	"fmt"
 	"net"
 )
 
@@ -39,6 +41,31 @@ func NewMatch() *Match {
 
 func (m *Match) Len() (n uint16) {
 	return 40
+}
+
+func (m *Match) String() string {
+	return fmt.Sprintf("Match{ Wildcards: %b, InPort: %d, DLSrc: %s, DLDst: %s, DLVLAN: %d, DLVLANPcp: %d, pad: %x, DLType: %d, NWTos: %d, NWProto: %d, pad2: %x, NWSrc: %s, NWDst: %s, TPSrc: %d, TPDst: %d }",
+		m.Wildcards, m.InPort, m.DLSrc, m.DLDst, m.DLVLAN, m.DLVLANPcp, m.pad, m.DLType, m.NWTos, m.NWProto, m.pad2, m.NWSrc, m.NWDst, m.TPSrc, m.TPDst)
+}
+
+func (m *Match) Equal(other interface{}) bool {
+	otherMatch, ok := other.(*Match)
+	return ok &&
+		m.Wildcards == otherMatch.Wildcards &&
+		m.InPort == otherMatch.InPort &&
+		m.DLSrc.String() == otherMatch.DLSrc.String() &&
+		m.DLDst.String() == otherMatch.DLDst.String() &&
+		m.DLVLAN == otherMatch.DLVLAN &&
+		m.DLVLANPcp == otherMatch.DLVLANPcp &&
+		bytes.Equal(m.pad, otherMatch.pad) &&
+		m.DLType == otherMatch.DLType &&
+		m.NWTos == otherMatch.NWTos &&
+		m.NWProto == otherMatch.NWProto &&
+		bytes.Equal(m.pad2, otherMatch.pad2) &&
+		m.NWSrc.Equal(otherMatch.NWSrc) &&
+		m.NWDst.Equal(otherMatch.NWDst) &&
+		m.TPSrc == otherMatch.TPSrc &&
+		m.TPDst == otherMatch.TPDst
 }
 
 func (m *Match) MarshalBinary() (data []byte, err error) {

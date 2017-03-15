@@ -43,6 +43,14 @@ func (h *Header) Len() (n uint16) {
 func (h *Header) String() string {
 	return fmt.Sprintf("Header{ Version: %d, Type: %d, Length: %d, Xid: %d }", h.Version, h.Type, h.Length, h.Xid)
 }
+func (h *Header) Equal(other interface{}) bool {
+	otherHeader, ok := other.(*Header)
+	return ok &&
+		h.Version == otherHeader.Version &&
+		h.Type == otherHeader.Type &&
+		h.Length == otherHeader.Length &&
+		h.Xid == otherHeader.Xid
+}
 
 func (h *Header) MarshalBinary() (data []byte, err error) {
 	data = make([]byte, 8)
@@ -55,7 +63,7 @@ func (h *Header) MarshalBinary() (data []byte, err error) {
 
 func (h *Header) UnmarshalBinary(data []byte) error {
 	if len(data) < 4 {
-		return errors.New("The []byte is too short to unmarshel a full HelloElemHeader.")
+		return errors.New("The []byte is too short to unmarshal a full header.")
 	}
 	h.Version = data[0]
 	h.Type = data[1]

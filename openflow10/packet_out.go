@@ -27,6 +27,7 @@ func NewPacketOut() *PacketOut {
 		BufferId: 0xffffffff,
 		InPort:   P_NONE,
 		Actions:  make([]Action, 0),
+		Data:     openflowxx.NewBuffer([]byte{}),
 	}
 }
 

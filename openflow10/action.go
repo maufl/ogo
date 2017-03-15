@@ -1,8 +1,10 @@
 package openflow10
 
 import (
+	"bytes"
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"net"
 )
 
@@ -28,6 +30,8 @@ type Action interface {
 	UnmarshalBinary([]byte) error
 	Len() uint16
 	Header() *ActionHeader
+	Equal(interface{}) bool
+	String() string
 }
 
 type ActionHeader struct {
@@ -41,6 +45,17 @@ func (a *ActionHeader) Header() *ActionHeader {
 
 func (a *ActionHeader) Len() (n uint16) {
 	return 4
+}
+
+func (a *ActionHeader) Equal(other interface{}) bool {
+	otherActionHeader, ok := other.(*ActionHeader)
+	return ok &&
+		a.Type == otherActionHeader.Type &&
+		a.Length == otherActionHeader.Length
+}
+
+func (a *ActionHeader) String() string {
+	return fmt.Sprintf("Action{ Type: %d, Length: %d }", a.Type, a.Length)
 }
 
 func (a *ActionHeader) MarshalBinary() (data []byte, err error) {
@@ -63,10 +78,38 @@ func (a *ActionHeader) UnmarshalBinary(data []byte) error {
 // TODO: Decode other Action types.
 func DecodeAction(data []byte) (Action, error) {
 	t := binary.BigEndian.Uint16(data[:2])
+	l := binary.BigEndian.Uint16(data[2:4])
+	if len(data) < int(l) {
+		return nil, errors.New("Insufficent data to decode action")
+	}
 	var a Action
 	switch t {
 	case ActionType_Output:
 		a = new(ActionOutput)
+	case ActionType_SetVLAN_VID:
+		a = new(ActionVLANVID)
+	case ActionType_SetVLAN_PCP:
+		a = new(ActionVLANPCP)
+	case ActionType_StripVLAN:
+		a = new(ActionStripVLAN)
+	case ActionType_SetDLSrc:
+		a = new(ActionDLAddr)
+	case ActionType_SetDLDst:
+		a = new(ActionDLAddr)
+	case ActionType_SetNWSrc:
+		a = new(ActionNWAddr)
+	case ActionType_SetNWDst:
+		a = new(ActionNWAddr)
+	case ActionType_SetNWTOS:
+		a = new(ActionNWTOS)
+	case ActionType_SetTPSrc:
+		a = new(ActionTPPort)
+	case ActionType_SetTPDst:
+		a = new(ActionTPPort)
+	case ActionType_Enqueue:
+		a = new(ActionEnqueue)
+	default:
+		return nil, errors.New("Unknown action type")
 	}
 	err := a.UnmarshalBinary(data)
 	return a, err
@@ -95,6 +138,15 @@ func NewActionOutput(number uint16) *ActionOutput {
 
 func (a *ActionOutput) Len() (n uint16) {
 	return a.ActionHeader.Len() + 4
+}
+
+func (a *ActionOutput) Equal(other interface{}) bool {
+	otherActionOutput, ok := other.(*ActionOutput)
+	return ok && a.ActionHeader.Equal(&otherActionOutput.ActionHeader) && a.Port == otherActionOutput.Port && a.MaxLen == otherActionOutput.MaxLen
+}
+
+func (a *ActionOutput) String() string {
+	return fmt.Sprintf("ActionOutput{ %s, Port: %d, MaxLen: %d }", &a.ActionHeader, a.Port, a.MaxLen)
 }
 
 func (a *ActionOutput) MarshalBinary() (data []byte, err error) {
@@ -203,11 +255,22 @@ func (a *ActionVLANVID) Len() (n uint16) {
 	return a.ActionHeader.Len() + 4
 }
 
+func (a *ActionVLANVID) String() string {
+	return fmt.Sprintf("ActionVLANVID{ %s, VLANVIDt: %d, pad: %x }", &a.ActionHeader, a.VLANVID, a.pad)
+}
+
+func (a *ActionVLANVID) Equal(other interface{}) bool {
+	otherActionVLANVID, ok := other.(*ActionVLANVID)
+	return ok && a.ActionHeader.Equal(&otherActionVLANVID.ActionHeader) && a.VLANVID == otherActionVLANVID.VLANVID && bytes.Equal(a.pad, otherActionVLANVID.pad)
+}
+
 func (a *ActionVLANVID) MarshalBinary() (data []byte, err error) {
 	data, err = a.ActionHeader.MarshalBinary()
-
+	if err != nil {
+		return
+	}
 	bytes := make([]byte, 4)
-	binary.BigEndian.PutUint16(data[:2], a.VLANVID)
+	binary.BigEndian.PutUint16(bytes[:2], a.VLANVID)
 	copy(bytes[2:4], a.pad)
 
 	data = append(data, bytes...)
@@ -221,7 +284,7 @@ func (a *ActionVLANVID) UnmarshalBinary(data []byte) error {
 	}
 	a.ActionHeader.UnmarshalBinary(data[:4])
 	a.VLANVID = binary.BigEndian.Uint16(data[4:6])
-	copy(a.pad, data[6:8])
+	a.pad = data[6:8]
 	return nil
 }
 
@@ -351,9 +414,8 @@ func (a *ActionDLAddr) MarshalBinary() (data []byte, err error) {
 }
 
 func (a *ActionDLAddr) UnmarshalBinary(data []byte) error {
-	if len(data) != int(a.Len()) {
-		return errors.New("The []byte the wrong size to unmarshal an " +
-			"ActionDLAddr message.")
+	if len(data) < int(a.Len()) {
+		return errors.New("Insufficent data to unmarshal ActionDLAddr message.")
 	}
 	a.ActionHeader.UnmarshalBinary(data[:4])
 	copy(a.DLAddr, data[4:10])

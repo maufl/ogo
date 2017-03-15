@@ -2,8 +2,9 @@ package openflow10
 
 import (
 	"encoding/binary"
-
+	"fmt"
 	"github.com/maufl/openflow/openflowxx"
+	"strings"
 )
 
 // ofp_flow_mod
@@ -26,11 +27,50 @@ func NewFlowMod() *FlowMod {
 	return &FlowMod{
 		Header:   openflowxx.NewHeader(VERSION, Type_FlowMod),
 		Match:    NewMatch(),
-		Priority: 1000,
+		Priority: 0,
 		BufferId: 0xffffffff,
 		OutPort:  P_NONE,
 		Actions:  make([]Action, 0),
 	}
+}
+
+func (f *FlowMod) Equal(other interface{}) bool {
+	otherFlowMod, ok := other.(*FlowMod)
+	if !ok {
+		return false
+	}
+	if !(f.Header.Equal(otherFlowMod.Header) &&
+		f.Match.Equal(otherFlowMod.Match) &&
+		f.Cookie == otherFlowMod.Cookie &&
+		f.Command == otherFlowMod.Command &&
+		f.IdleTimeout == otherFlowMod.IdleTimeout &&
+		f.HardTimeout == otherFlowMod.HardTimeout &&
+		f.Priority == otherFlowMod.Priority &&
+		f.BufferId == otherFlowMod.BufferId &&
+		f.OutPort == otherFlowMod.OutPort &&
+		f.Flags == otherFlowMod.Flags) {
+		return false
+	}
+	if len(f.Actions) != len(otherFlowMod.Actions) {
+		return false
+	}
+	for i, action := range f.Actions {
+		otherAction := otherFlowMod.Actions[i]
+		if !action.Equal(otherAction) {
+			return false
+		}
+	}
+	return true
+}
+
+func (f *FlowMod) String() string {
+	actionStrings := make([]string, len(f.Actions))
+	for i, action := range f.Actions {
+		actionStrings[i] = action.String()
+	}
+	actionString := "[ " + strings.Join(actionStrings, ", ") + " ]"
+	return fmt.Sprintf("FlowMod{ %s, %s, Cookie: %d, Command: %d, IdleTimeout: %d, HardTimeout: %d, Priority: %d, BufferId: %x, Outport: %d, Flags: %d, Actions: %+v }",
+		f.Header, f.Match, f.Cookie, f.Command, f.IdleTimeout, f.HardTimeout, f.Priority, f.BufferId, f.OutPort, f.Flags, actionString)
 }
 
 func (f *FlowMod) AddAction(a Action) {
@@ -76,6 +116,9 @@ func (f *FlowMod) MarshalBinary() (data []byte, err error) {
 
 	for _, a := range f.Actions {
 		bytes, err = a.MarshalBinary()
+		if err != nil {
+			return nil, err
+		}
 		data = append(data, bytes...)
 	}
 	return
