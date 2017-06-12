@@ -18,6 +18,7 @@ func NewPortStatus() *PortStatus {
 	return &PortStatus{
 		Header: openflowxx.NewHeader(VERSION, Type_PortStatus),
 		pad:    make([]byte, 7),
+		Desc:   *NewPhyPort(),
 	}
 }
 
