@@ -2,6 +2,7 @@ package openflow10
 
 import (
 	"encoding/binary"
+	"fmt"
 
 	"github.com/maufl/openflow/openflowxx"
 )
@@ -137,7 +138,7 @@ func (s *StatsReply) UnmarshalBinary(data []byte) error {
 		// Array
 		s.Body = NewFlowStatsArray()
 	case StatsType_Port:
-		s.Body = NewPortStats()
+		s.Body = NewPortStatsArray()
 	case StatsType_Table:
 		// Array
 		s.Body = NewTableStats()
@@ -695,6 +696,11 @@ func (s *PortStats) Len() (n uint16) {
 	return 104
 }
 
+func (s *PortStats) String() string {
+	return fmt.Sprintf("PortStats{ PortNo: %d, RxPackets: %d, TxPackets: %d, RxBytes: %d, TxBytes: %d, RxDropped: %d, TxDropped: %d, RxErrors: %d, TxErrors: %d, RxFrameErr: %d, RxOverErr: %d, RxCRCErr: %d, Collisions: %d }",
+		s.PortNo, s.RxPackets, s.TxPackets, s.RxBytes, s.TxBytes, s.RxDropped, s.TxDropped, s.RxErrors, s.TxErrors, s.RxFrameErr, s.RxOverErr, s.RxCRCErr, s.Collisions)
+}
+
 func (s *PortStats) MarshalBinary() (data []byte, err error) {
 	data = make([]byte, int(s.Len()))
 	n := 0
@@ -759,6 +765,48 @@ func (s *PortStats) UnmarshalBinary(data []byte) error {
 	n += 8
 	s.Collisions = binary.BigEndian.Uint64(data[n:])
 	n += 8
+	return nil
+}
+
+type PortStatsArray struct {
+	Array []*PortStats
+}
+
+func NewPortStatsArray() *PortStatsArray {
+	return &PortStatsArray{Array: make([]*PortStats, 0)}
+}
+
+func (psa *PortStatsArray) Len() (n uint16) {
+	for _, ps := range psa.Array {
+		n += ps.Len()
+	}
+	return
+}
+
+func (psa *PortStatsArray) MarshalBinary() (data []byte, err error) {
+	data = make([]byte, int(psa.Len()))
+	n := 0
+	for _, ps := range psa.Array {
+		b, err := ps.MarshalBinary()
+		if err != nil {
+			return nil, err
+		}
+		copy(data[n:], b)
+		n += len(b)
+	}
+	return
+}
+
+func (psa *PortStatsArray) UnmarshalBinary(data []byte) error {
+	n := 0
+	for n < len(data) {
+		ps := NewPortStats()
+		if err := ps.UnmarshalBinary(data[n:]); err != nil {
+			return err
+		}
+		psa.Array = append(psa.Array, ps)
+		n += int(ps.Len())
+	}
 	return nil
 }
 

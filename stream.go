@@ -55,7 +55,7 @@ func NewMessageStream(conn net.Conn) *MessageStream {
 	go m.outbound()
 	go m.inbound()
 
-	for i := 0; i < 25; i++ {
+	for i := 0; i < 1; i++ {
 		go m.parse()
 	}
 	return m
@@ -136,9 +136,13 @@ func (m *MessageStream) parse() {
 		// Log all message parsing errors.
 		if err != nil {
 			log.Print(err)
+		} else {
+			m.Inbound <- msg
+		}
+		if msg == nil && err == nil {
+			panic("Contract violation")
 		}
 		// TODO we close the channel in inbound, this leads to a panic
-		m.Inbound <- msg
 		b.Reset()
 		m.pool.Empty <- b
 	}
